@@ -61,7 +61,7 @@ impl CharacterGenerator {
         }
         
         // Generate ability scores
-        let ability_scores = Self::generate_ability_scores(dice, faces, lowest);
+        let ability_scores = Self::generate_scores(dice, faces, lowest);
         
         Ok(Character {
             level,
@@ -121,19 +121,19 @@ impl CharacterGenerator {
         Ok(())
     }
     
-    fn generate_ability_score(expr: &mut DiceExpr) -> u32 {
+    fn generate_score(expr: &mut DiceExpr) -> u32 {
         expr.roll().unwrap().total as u32
     }
 
-    fn generate_ability_scores(dice: u32, faces: u32, lowest: u32) -> AbilityScores {
+    fn generate_scores(dice: u32, faces: u32, lowest: u32) -> AbilityScores {
         let mut expr = DiceExpr::Roll(RollSpec::new(dice, faces, Some(Keep::Highest(dice-lowest))));
         AbilityScores {
-            strength: Self::generate_ability_score(&mut expr),
-            dexterity: Self::generate_ability_score(&mut expr),
-            constitution: Self::generate_ability_score(&mut expr),
-            intelligence: Self::generate_ability_score(&mut expr),
-            wisdom: Self::generate_ability_score(&mut expr),
-            charisma: Self::generate_ability_score(&mut expr),
+            strength: Self::generate_score(&mut expr),
+            dexterity: Self::generate_score(&mut expr),
+            constitution: Self::generate_score(&mut expr),
+            intelligence: Self::generate_score(&mut expr),
+            wisdom: Self::generate_score(&mut expr),
+            charisma: Self::generate_score(&mut expr),
         }
     }
 }
