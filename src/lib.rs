@@ -71,7 +71,7 @@ impl CharacterGenerator {
         })
     }
     
-    pub fn generate_characters(&self, level: u32, count: u32, dice: u32, faces: u32, lowest: u32) -> anyhow::Result<Vec<Character>> {
+    pub fn generate_characters(&self, count: u32, level: u32, dice: u32, faces: u32, lowest: u32) -> anyhow::Result<Vec<Character>> {
         if count < 1 {
             return Err(anyhow::anyhow!("Must generate at least 1 character"));
         }
@@ -121,11 +121,11 @@ impl CharacterGenerator {
         Ok(())
     }
     
-    fn generate_score(expr: &mut DiceExpr) -> u32 {
+    pub fn generate_score(expr: &mut DiceExpr) -> u32 {
         expr.roll().unwrap().total as u32
     }
 
-    fn generate_scores(dice: u32, faces: u32, lowest: u32) -> AbilityScores {
+    pub fn generate_scores(dice: u32, faces: u32, lowest: u32) -> AbilityScores {
         let mut expr = DiceExpr::Roll(RollSpec::new(dice, faces, Some(Keep::Highest(dice-lowest))));
         AbilityScores {
             strength: Self::generate_score(&mut expr),
@@ -172,7 +172,7 @@ mod tests {
         let config = create_test_config();
         let generator = CharacterGenerator::from_config(config);
         
-        let character = generator.generate_character(5).unwrap();
+        let character = generator.generate_character(5, 3, 6, 0).unwrap();
         
         assert_eq!(character.level, 5);
         assert!(!character.species.is_empty());
@@ -185,9 +185,9 @@ mod tests {
         let config = create_test_config();
         let generator = CharacterGenerator::from_config(config);
         
-        let characters = generator.generate_characters(3, 5).unwrap();
+        let characters = generator.generate_characters(10, 3, 4, 6, 1).unwrap();
         
-        assert_eq!(characters.len(), 5);
+        assert_eq!(characters.len(), 10);
         assert!(characters.iter().all(|c| c.level == 3));
     }
     
@@ -196,8 +196,8 @@ mod tests {
         let config = create_test_config();
         let generator = CharacterGenerator::from_config(config);
         
-        assert!(generator.generate_character(0).is_err());
-        assert!(generator.generate_character(21).is_err());
+        assert!(generator.generate_character(14, 3, 6, 0).is_err());
+        assert!(generator.generate_character(21, 4, 6, 1).is_err());
     }
     
     #[test]
@@ -207,7 +207,7 @@ mod tests {
         
         // Generate many characters to eventually get a wizard
         for _ in 0..100 {
-            let character = generator.generate_character(1).unwrap();
+            let character = generator.generate_character(1, 3, 6, 0).unwrap();
             if character.class.starts_with("Wizard") {
                 assert!(character.class.contains("("));
                 assert!(character.class.contains(")"));
