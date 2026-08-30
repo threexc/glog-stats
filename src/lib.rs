@@ -1,3 +1,4 @@
+use dice_parser::{DiceExpr, RollSpec, Keep};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -11,7 +12,7 @@ pub struct Config {
 
 #[derive(Debug, Serialize, Clone)]
 pub struct Character {
-    pub level: u8,
+    pub level: u32,
     pub class: String,
     pub species: String,
     pub ability_scores: AbilityScores,
@@ -19,12 +20,12 @@ pub struct Character {
 
 #[derive(Debug, Serialize, Clone)]
 pub struct AbilityScores {
-    pub strength: u8,
-    pub dexterity: u8,
-    pub constitution: u8,
-    pub intelligence: u8,
-    pub wisdom: u8,
-    pub charisma: u8,
+    pub strength: u32,
+    pub dexterity: u32,
+    pub constitution: u32,
+    pub intelligence: u32,
+    pub wisdom: u32,
+    pub charisma: u32,
 }
 
 pub struct CharacterGenerator {
@@ -42,7 +43,7 @@ impl CharacterGenerator {
         Self { config }
     }
     
-    pub fn generate_character(&self, level: u8, dice: u8, faces: u8, lowest: u8) -> anyhow::Result<Character> {
+    pub fn generate_character(&self, level: u32, dice: u32, faces: u32, lowest: u32) -> anyhow::Result<Character> {
         if level < 1 || level > 10 {
             return Err(anyhow::anyhow!("Level must be between 1 and 10"));
         }
@@ -60,7 +61,7 @@ impl CharacterGenerator {
         }
         
         // Generate ability scores
-        let ability_scores = Self::generate_ability_scores(&mut rng, dice, faces, lowest);
+        let ability_scores = Self::generate_ability_scores(dice, faces, lowest);
         
         Ok(Character {
             level,
@@ -70,7 +71,7 @@ impl CharacterGenerator {
         })
     }
     
-    pub fn generate_characters(&self, level: u8, count: u8, dice: u8, faces: u8, lowest: u8) -> anyhow::Result<Vec<Character>> {
+    pub fn generate_characters(&self, level: u32, count: u32, dice: u32, faces: u32, lowest: u32) -> anyhow::Result<Vec<Character>> {
         if count < 1 {
             return Err(anyhow::anyhow!("Must generate at least 1 character"));
         }
@@ -120,30 +121,25 @@ impl CharacterGenerator {
         Ok(())
     }
     
-    fn generate_ability_scores(rng: &mut impl Rng, dice: u8, faces: u8, lowest: u8) -> AbilityScores {
-        AbilityScores {
-            strength: Self::roll_ability_score(rng, dice, faces, lowest),
-            dexterity: Self::roll_ability_score(rng, dice, faces, lowest),
-            constitution: Self::roll_ability_score(rng, dice, faces, lowest),
-            intelligence: Self::roll_ability_score(rng, dice, faces, lowest),
-            wisdom: Self::roll_ability_score(rng, dice, faces, lowest),
-            charisma: Self::roll_ability_score(rng, dice, faces, lowest),
-        }
+    fn generate_ability_score(expr: &mut DiceExpr) -> u32 {
+        expr.roll().unwrap().total as u32
     }
-    
-    pub fn roll_ability_score(rng: &mut impl Rng, dice: u8, faces: u8, lowest: u8) -> u8 {
-        // Roll 3d6
-        let mut rolls: Vec<u8> = (0..dice).map(|_| rng.gen_range(1..=faces)).collect();
-        rolls.sort_unstable();
 
-        // need to cast 'lowest' to usize to use in a slice
-        let lowest = lowest as usize;
-        rolls[lowest..].iter().sum()
+    fn generate_ability_scores(dice: u32, faces: u32, lowest: u32) -> AbilityScores {
+        let mut expr = DiceExpr::Roll(RollSpec::new(dice, faces, Some(Keep::Highest(dice-lowest))));
+        AbilityScores {
+            strength: Self::generate_ability_score(&mut expr),
+            dexterity: Self::generate_ability_score(&mut expr),
+            constitution: Self::generate_ability_score(&mut expr),
+            intelligence: Self::generate_ability_score(&mut expr),
+            wisdom: Self::generate_ability_score(&mut expr),
+            charisma: Self::generate_ability_score(&mut expr),
+        }
     }
 }
 
 // Utility functions for file operations
-pub fn save_characters_to_file(characters: &[Character], level: u8, count: u8) -> anyhow::Result<String> {
+pub fn save_characters_to_file(characters: &[Character], level: u32, count: u32) -> anyhow::Result<String> {
     let filename = format!("characters_level_{}_count_{}.toml", level, count);
     
     // Create a wrapper struct to hold all characters
