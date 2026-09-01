@@ -1,0 +1,10 @@
+[classes]
+    Barbarian = { has_md = false }
+    Fighter = { has_md = false }
+    Hunter = { has_md = false }
+    Knight = { has_md = false }
+    Monk = { has_md = false }
+    Sorcerer = { has_md = false }
+    Summoner = { has_md = false }
+    Thief = { has_md = false }
+    Wizard = { has_md = false }

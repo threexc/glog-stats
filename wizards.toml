@@ -1,0 +1,14 @@
+[wizards]
+    Animist = { school_type = "Outlawed" }
+    Biomancer = { school_type = "Outlawed" }
+    Curse-Eater = { school_type = "Outlawed" }
+    Drowned = { school_type = "Outsider" }
+    Elementalist = { school_type = "Chartered" }
+    Elf = { school_type = "Outsider" }
+    Garden = { school_type = "Chartered" }
+    Geometer = { school_type = "Chartered" }
+    Illusionist = { school_type = "Chartered" }
+    Necromancer = { school_type = "Outlawed" }
+    Orthodox = { school_type = "Chartered" }
+    Spider = { school_type = "Outsider" }
+    White-Hand = { school_type = "Chartered" }
