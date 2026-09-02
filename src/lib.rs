@@ -4,10 +4,28 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct Species {
+    pub name: String,
+    pub reroll: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct Class {
+    pub name: String,
+    pub has_md: bool,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct WizardArchetype {
+    pub name: String,
+    pub school_type: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct Config {
-    pub species: Vec<String>,
-    pub classes: Vec<String>,
-    pub wizard_archetypes: Vec<String>,
+    pub species: Vec<Species>,
+    pub classes: Vec<Class>,
+    pub wizard_archetypes: Vec<WizardArchetype>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -49,24 +67,20 @@ impl CharacterGenerator {
         }
         
         let mut rng = rand::thread_rng();
-        
-        // Generate random species and class
         let species = self.config.species[rng.gen_range(0..self.config.species.len())].clone();
         let mut class = self.config.classes[rng.gen_range(0..self.config.classes.len())].clone();
-        
-        // If wizard is selected, add an archetype
-        if class == "Wizard" {
+
+        if class.name == "Wizard" {
             let archetype = &self.config.wizard_archetypes[rng.gen_range(0..self.config.wizard_archetypes.len())];
-            class = format!("Wizard ({})", archetype);
+            class.name = format!("Wizard ({})", archetype.name);
         }
-        
-        // Generate ability scores
+
         let ability_scores = Self::generate_scores(dice, faces, lowest);
-        
+
         Ok(Character {
             level,
-            class,
-            species,
+            class: class.name,
+            species: species.name,
             ability_scores,
         })
     }
