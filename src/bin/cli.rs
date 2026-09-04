@@ -1,4 +1,4 @@
-use glog_v2_character_generator::{CharacterGenerator, save_characters_to_file};
+use glog_v2_character_generator::CharacterGenerator;
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -60,9 +60,8 @@ fn main() -> anyhow::Result<()> {
     }
     
     // Save to file
-    let filename = save_characters_to_file(&characters, args.level, args.count)?;
     println!("\n{} character(s) generated successfully!", args.count);
-    println!("Characters saved to: {}", filename);
+    println!("Characters saved to character.txt");
     
     Ok(())
 }
